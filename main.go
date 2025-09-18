@@ -11,11 +11,15 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/healthz", healthHandler)
+	cfg := LoadConfig()
 
-	port := ":8080"
-	log.Printf("Server listening on %s", port)
-	if err := http.ListenAndServe(port, nil); err != nil {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", healthHandler)
+
+	handler := LoggingMiddleware(RecoveryMiddleware(mux))
+
+	log.Printf("Server listening on %s", cfg.Port)
+	if err := http.ListenAndServe(cfg.Port, handler); err != nil {
 		log.Fatal(err)
 	}
 }
