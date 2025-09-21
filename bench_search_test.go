@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -64,6 +66,11 @@ func BenchmarkJSONEncoder_ReusedBuffer(b *testing.B) {
 }
 
 func BenchmarkHandlerPipeline(b *testing.B) {
+	// 靜音全域 log
+	origWriter := log.Writer()
+	log.SetOutput(io.Discard)
+	defer log.SetOutput(origWriter)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/healthz", healthHandler)
 	mux.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
