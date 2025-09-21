@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -58,5 +60,24 @@ func BenchmarkJSONEncoder_ReusedBuffer(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		buf.Reset()
 		_ = enc.Encode(resp) // 注意 Encode 會在結尾加 '\n'
+	}
+}
+
+func BenchmarkHandlerPipeline(b *testing.B) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", healthHandler)
+	mux.HandleFunc("/search", func(w http.ResponseWriter, r *http.Request) {
+		// 直接回簡單 JSON，避免 I/O 干擾
+		_ = json.NewEncoder(w).Encode(resp)
+	})
+	h := LoggingMiddleware(RecoveryMiddleware(mux))
+
+	req := httptest.NewRequest(http.MethodGet, "/search?q=golang", nil)
+
+	b.ReportAllocs()
+	for i := 0; i < b.N; i++ {
+		rr := httptest.NewRecorder()
+		h.ServeHTTP(rr, req)
+		_ = rr.Result().Body.Close()
 	}
 }
