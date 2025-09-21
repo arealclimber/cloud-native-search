@@ -27,35 +27,24 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 建立帶有 timeout 的 context
+	// 仍建立可傳遞的 ctx（之後會傳給 ES/DB client）
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
+	_ = ctx // 先保留，用於未來下游呼叫
 
-	// 模擬下游呼叫（例如 Elasticsearch）
-	resultCh := make(chan SearchResponse, 1)
-	go func() {
-		// 假裝需要 3 秒（比 timeout 長）
-		time.Sleep(3 * time.Second)
-		resultCh <- SearchResponse{
-			Query: query,
-			Hits: []SearchResult{
-				{ID: 1, Title: "Learning Go"},
-				{ID: 2, Title: "Go Concurrency Patterns"},
-			},
-		}
-	}()
+	// 立即回假資料（不再 sleep）
+	resp := SearchResponse{
+		Query: query,
+		Hits: []SearchResult{
+			{ID: 1, Title: "Learning Go"},
+			{ID: 2, Title: "Go Concurrency Patterns"},
+		},
+	}
 
-	select {
-	case <-ctx.Done():
-		// timeout 或被取消
-		http.Error(w, "search timeout", http.StatusGatewayTimeout)
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, fmt.Sprintf("encode error: %v", err), http.StatusInternalServerError)
 		return
-	case resp := <-resultCh:
-		// 正常拿到結果
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(resp); err != nil {
-			http.Error(w, fmt.Sprintf("encode error: %v", err), http.StatusInternalServerError)
-		}
 	}
 }
 
