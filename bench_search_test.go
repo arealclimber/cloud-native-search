@@ -13,20 +13,13 @@ var smallHits = []SearchResult{
 
 // 1A) 動態 append（可能反覆擴容）
 func buildHitsAppend(src []SearchResult) []SearchResult {
-	out := []SearchResult{}
-	for _, h := range src {
-		out = append(out, h)
-	}
-	return out
+	return append([]SearchResult{}, src...)
 }
 
 // 1B) 預先配置容量（避免擴容）
 func buildHitsPrealloc(src []SearchResult) []SearchResult {
 	out := make([]SearchResult, 0, len(src))
-	for _, h := range src {
-		out = append(out, h)
-	}
-	return out
+	return append(out, src...)
 }
 
 func BenchmarkBuildHitsAppend(b *testing.B) {
