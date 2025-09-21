@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 )
 
 // 假資料
@@ -25,6 +27,12 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 仍建立可傳遞的 ctx（之後會傳給 ES/DB client）
+	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+	defer cancel()
+	_ = ctx // 先保留，用於未來下游呼叫
+
+	// 立即回假資料（不再 sleep）
 	resp := SearchResponse{
 		Query: query,
 		Hits: []SearchResult{
@@ -36,6 +44,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		http.Error(w, fmt.Sprintf("encode error: %v", err), http.StatusInternalServerError)
+		return
 	}
 }
 
