@@ -2,12 +2,14 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 type respEnvelope struct {
@@ -86,5 +88,22 @@ func BenchmarkHandlerPipeline(b *testing.B) {
 		rr := httptest.NewRecorder()
 		h.ServeHTTP(rr, req)
 		_ = rr.Result().Body.Close()
+	}
+}
+
+func BenchmarkRunWorkerPool(b *testing.B) {
+	ctx := context.Background()
+	items := make([]WorkItem, 100)
+	for i := range items {
+		items[i] = WorkItem{
+			ID: i,
+			Task: func(ctx context.Context) error {
+				time.Sleep(1 * time.Millisecond)
+				return nil
+			},
+		}
+	}
+	for i := 0; i < b.N; i++ {
+		RunWorkerPool(ctx, 10, items) // 最多 10 個並行
 	}
 }
