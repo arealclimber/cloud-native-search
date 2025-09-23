@@ -61,6 +61,9 @@ func main() {
 
 	handler := LoggingMiddleware(RecoveryMiddleware(mux))
 
+	// 啟動 pprof (只有 build tag=debug 才會啟動)
+	StartPprof()
+
 	log.Printf("Server listening on %s", cfg.Port)
 	if err := http.ListenAndServe(cfg.Port, handler); err != nil {
 		log.Fatal(err)

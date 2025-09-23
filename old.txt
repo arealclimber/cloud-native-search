@@ -1,0 +1,21 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/arealclimber/cloud-native-search
+cpu: Apple M3 Pro
+BenchmarkBuildHitsAppend-11             	52700761	        37.23 ns/op	      80 B/op	       1 allocs/op
+BenchmarkBuildHitsAppend-11             	47263166	        30.25 ns/op	      80 B/op	       1 allocs/op
+BenchmarkBuildHitsAppend-11             	37435364	        30.58 ns/op	      80 B/op	       1 allocs/op
+BenchmarkBuildHitsPrealloc-11           	63331050	        20.90 ns/op	      80 B/op	       1 allocs/op
+BenchmarkBuildHitsPrealloc-11           	65470170	        19.99 ns/op	      80 B/op	       1 allocs/op
+BenchmarkBuildHitsPrealloc-11           	57327692	        19.62 ns/op	      80 B/op	       1 allocs/op
+BenchmarkJSONMarshal-11                 	 4599213	       264.2 ns/op	     192 B/op	       2 allocs/op
+BenchmarkJSONMarshal-11                 	 4753477	       266.8 ns/op	     192 B/op	       2 allocs/op
+BenchmarkJSONMarshal-11                 	 4647738	       261.9 ns/op	     192 B/op	       2 allocs/op
+BenchmarkJSONEncoder_ReusedBuffer-11    	 5040187	       266.8 ns/op	      48 B/op	       1 allocs/op
+BenchmarkJSONEncoder_ReusedBuffer-11    	 4796756	       232.0 ns/op	      48 B/op	       1 allocs/op
+BenchmarkJSONEncoder_ReusedBuffer-11    	 4918977	       241.2 ns/op	      48 B/op	       1 allocs/op
+BenchmarkHandlerPipeline-11             	  975900	      1279 ns/op	    1409 B/op	      18 allocs/op
+BenchmarkHandlerPipeline-11             	 1000000	      1374 ns/op	    1409 B/op	      18 allocs/op
+BenchmarkHandlerPipeline-11             	  902229	      1214 ns/op	    1409 B/op	      18 allocs/op
+PASS
+ok  	github.com/arealclimber/cloud-native-search	22.880s
