@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // 假資料
@@ -59,7 +61,11 @@ func main() {
 	mux.HandleFunc("/healthz", healthHandler)
 	mux.HandleFunc("/search", searchHandler)
 
-	handler := LoggingMiddleware(RecoveryMiddleware(mux))
+	// 新增 metrics endpoint
+	mux.Handle("/metrics", promhttp.Handler())
+
+	// 中介層：metrics → logging → recovery
+	handler := MetricsMiddleware(LoggingMiddleware(RecoveryMiddleware(mux)))
 
 	// 啟動 pprof (只有 build tag=debug 才會啟動)
 	StartPprof()
