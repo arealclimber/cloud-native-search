@@ -11,17 +11,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// 假資料
-type SearchResult struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-}
-
-type SearchResponse struct {
-	Query string         `json:"query"`
-	Hits  []SearchResult `json:"hits"`
-}
-
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
